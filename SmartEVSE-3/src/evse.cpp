@@ -401,7 +401,7 @@ void IRAM_ATTR onTimerA() {
 // Task is called every 10ms
 void BlinkLed(void * parameter) {
     uint8_t LcdPwm = 0;
-    uint8_t RedPwm = 0, GreenPwm = 0, BluePwm = 0;
+    uint8_t RedPwm = LED_OFF, GreenPwm = LED_OFF, BluePwm = LED_OFF;
     uint8_t LedCount = 0;                                                   // Raw Counter before being converted to PWM value
     unsigned int LedPwm = 0;                                                // PWM value 0-255
 
@@ -432,29 +432,29 @@ void BlinkLed(void * parameter) {
             if (ErrorFlags & (RCM_TRIPPED | CT_NOCOMM | EV_NOCOMM) ) {
                 LedCount += 20;                                                 // Very rapid flashing, RCD tripped or no Serial Communication.
                 if (LedCount > 128) LedPwm = ERROR_LED_BRIGHTNESS;              // Red LED 50% of time on, full brightness
-                else LedPwm = 0;
+                else LedPwm = LED_OFF;
                 RedPwm = LedPwm;
-                GreenPwm = 0;
-                BluePwm = 0;
+                GreenPwm = LED_OFF;
+                BluePwm = LED_OFF;
             } else {                                                            // Waiting for Solar power or not enough current to start charging
                 LedCount += 2;                                                  // Slow blinking.
                 if (LedCount > 230) LedPwm = WAITING_LED_BRIGHTNESS;            // LED 10% of time on, full brightness
-                else LedPwm = 0;
+                else LedPwm = LED_OFF;
 
                 if (Mode == MODE_SOLAR) {                                       // Orange
                     RedPwm = LedPwm;
                     GreenPwm = LedPwm * 2 / 3;
                 } else {                                                        // Green
-                    RedPwm = 0;
+                    RedPwm = LED_OFF;
                     GreenPwm = LedPwm;
                 }    
-                BluePwm = 0;
+                BluePwm = LED_OFF;
             }
 
         } else if (Access_bit == 0 || State == STATE_MODEM_DENIED) {                                            // No Access, LEDs off
-            RedPwm = 0;
-            GreenPwm = 0;
-            BluePwm = 0;
+            RedPwm = LED_OFF;
+            GreenPwm = LED_OFF;
+            BluePwm = LED_OFF;
             LedPwm = 0;                  
         } else {                                                                // State A, B or C
     
@@ -475,7 +475,7 @@ void BlinkLed(void * parameter) {
                 RedPwm = LedPwm;
                 GreenPwm = LedPwm * 2 / 3;
             } else {
-                RedPwm = 0;                                                     // Green for Normal/Smart mode
+                RedPwm = LED_OFF;                                                     // Green for Normal/Smart mode
                 GreenPwm = LedPwm;
             }
             BluePwm = 0;            
