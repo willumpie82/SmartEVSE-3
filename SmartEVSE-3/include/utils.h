@@ -27,6 +27,10 @@
 #ifndef UTILS_H
 #define	UTILS_H
 
+#define RTC_ENTER_CRITICAL()    portENTER_CRITICAL(&rtc_spinlock)
+#define RTC_EXIT_CRITICAL()     portEXIT_CRITICAL(&rtc_spinlock)
+
+
 extern unsigned long pow_10[10];
 
 uint32_t MacId();

@@ -25,10 +25,7 @@
 
 #define __EVSE_MAIN
 
-#ifndef DBG
-//the wifi-debugger is available by telnetting to your SmartEVSE device
-#define DBG 0  //comment or set to 0 for production release, 0 = no debug 1 = debug over telnet, 2 = debug over usb serial
-#endif
+
 
 #ifndef FAKE_RFID
 //set FAKE_RFID to 1 to emulate an rfid reader with rfid of card = 123456
@@ -77,39 +74,6 @@
 #endif
 
 
-#if DBG == 0
-//used to steer RemoteDebug
-#define DEBUG_DISABLED 1
-#define _LOG_W( ... ) //dummy
-#define _LOG_I( ... ) //dummy
-#define _LOG_D( ... ) //dummy
-#define _LOG_V( ... ) //dummy
-#define _LOG_A( ... ) //dummy
-#define _LOG_W_NO_FUNC( ... ) //dummy
-#define _LOG_I_NO_FUNC( ... ) //dummy
-#define _LOG_D_NO_FUNC( ... ) //dummy
-#define _LOG_V_NO_FUNC( ... ) //dummy
-#define _LOG_A_NO_FUNC( ... ) //dummy
-#endif
-
-#if DBG == 1
-#define _LOG_A(fmt, ...) if (Debug.isActive(Debug.ANY))                Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__) //Always = Errors!!!
-#define _LOG_P(fmt, ...) if (Debug.isActive(Debug.PROFILER))   Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__)
-#define _LOG_V(fmt, ...) if (Debug.isActive(Debug.VERBOSE))    Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__)         //Verbose
-#define _LOG_D(fmt, ...) if (Debug.isActive(Debug.DEBUG))              Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__) //Debug
-#define _LOG_I(fmt, ...) if (Debug.isActive(Debug.INFO))               Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__) //Info
-#define _LOG_W(fmt, ...) if (Debug.isActive(Debug.WARNING))    Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__)         //Warning
-#define _LOG_E(fmt, ...) if (Debug.isActive(Debug.ERROR))              Debug.printf("(%s)(C%d) " fmt, __func__, xPortGetCoreID(), ##__VA_ARGS__) //Error not used!
-#define _LOG_A_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.ANY))                Debug.printf(fmt, ##__VA_ARGS__)
-#define _LOG_P_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.PROFILER))   Debug.printf(fmt, ##__VA_ARGS__)
-#define _LOG_V_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.VERBOSE))    Debug.printf(fmt, ##__VA_ARGS__)
-#define _LOG_D_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.DEBUG))              Debug.printf(fmt, ##__VA_ARGS__)
-#define _LOG_I_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.INFO))               Debug.printf(fmt, ##__VA_ARGS__)
-#define _LOG_W_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.WARNING))    Debug.printf(fmt, ##__VA_ARGS__)
-#define _LOG_E_NO_FUNC(fmt, ...) if (Debug.isActive(Debug.ERROR))              Debug.printf(fmt, ##__VA_ARGS__)
-#include "RemoteDebug.h"  //https://github.com/JoaoLopesF/RemoteDebug
-extern RemoteDebug Debug;
-#endif
 
 #define EVSE_LOG_FORMAT(letter, format) "[%6u][" #letter "][%s:%u] %s(): " format , (uint32_t) (esp_timer_get_time() / 1000ULL), pathToFileName(__FILE__), __LINE__, __FUNCTION__
 
@@ -152,40 +116,7 @@ extern RemoteDebug Debug;
 #endif
 #endif  // if DBG == 2
 
-// Pin definitions left side ESP32
-#define PIN_TEMP 36
-#define PIN_CP_IN 39
-#define PIN_PP_IN 34
-#define PIN_LOCK_IN 35
-#define PIN_SSR 32
-#define PIN_LCD_SDO_B3 33                                                       // = SPI_MOSI
-#define PIN_LCD_A0_B2 25
-#define PIN_LCD_CLK 26                                                          // = SPI_SCK
-#define PIN_SSR2 27
-#define PIN_LCD_LED 14
-#define PIN_LEDB 12
-#define PIN_RCM_FAULT 13
 
-// Pin definitions right side ESP32
-#define PIN_RS485_RX 23
-#define PIN_RS485_DIR 22
-//#define PIN_RXD 
-//#define PIN_TXD
-#define PIN_RS485_TX 21
-#define PIN_CP_OUT 19
-#define PIN_ACTB 18
-#define PIN_LCD_RST 5
-#define PIN_ACTA 17
-#define PIN_SW_IN 16
-#define PIN_LEDG 4
-#define PIN_IO0_B1 0
-#define PIN_LEDR 2
-#define PIN_CPOFF 15
-
-#define SPI_MOSI 33                                                             // SPI connections to LCD
-#define SPI_MISO -1
-#define SPI_SCK 26
-#define SPI_SS -1
 
 #define CP_CHANNEL 0
 #define RED_CHANNEL 2                                                           // PWM channel 2 (0 and 1 are used by CP signal)
@@ -204,15 +135,11 @@ extern RemoteDebug Debug;
 #ifndef MIN_CURRENT
 #define MIN_CURRENT 6                                                           // minimum Current the EV will accept
 #endif
-#define MODE 0                                                                  // Normal EVSE mode
 #define LOCK 0                                                                  // No Cable lock
 #define MAX_CIRCUIT 16                                                          // Max current of the EVSE circuit breaker
 #define CONFIG 0                                                                // Configuration: 0= TYPE 2 socket, 1= Fixed Cable
 #define LOADBL 0                                                                // Load Balancing disabled
-#define SWITCH 0                                                                // 0= Charge on plugin, 1= (Push)Button on IO2 is used to Start/Stop charging.
-#define RC_MON 0                                                                // Residual Current Monitoring on IO3. Disabled=0, RCM14=1
 #define CHARGEDELAY 60                                                          // Seconds to wait after overcurrent, before trying again
-#define BACKLIGHT 120                                                           // Seconds delay for the LCD backlight to turn off.
 #define RFIDLOCKTIME 60                                                         // Seconds delay for the EVSE to lock again (RFIDreader = EnableOne)
 #define START_CURRENT 4                                                         // Start charging when surplus current on sum of all phases exceeds 4A (Solar)
 #define STOP_TIME 10                                                            // Stop charging after 10 minutes at MIN charge current (Solar)
@@ -241,9 +168,7 @@ extern RemoteDebug Debug;
 #define ACCESS_BIT 1
 #define WIFI_MODE 0
 #define AP_PASSWORD "00000000"
-#define CARD_OFFSET 0
 #define INITIALIZED 0
-#define ENABLE_C2 ALWAYS_ON
 #define MAX_TEMPERATURE 65
 #define DELAYEDSTARTTIME 0                                                             // The default StartTime for delayed charged, 0 = not delaying
 #define DELAYEDSTOPTIME 0                                                       // The default StopTime for delayed charged, 0 = not stopping
@@ -251,10 +176,7 @@ extern RemoteDebug Debug;
 #define OCPP_MODE 0
 #define AUTOUPDATE 0                                                            // default for Automatic Firmware Update: 0 = disabled, 1 = enabled
 
-// Mode settings
-#define MODE_NORMAL 0
-#define MODE_SMART 1
-#define MODE_SOLAR 2
+
 
 #define MODBUS_BAUDRATE 9600
 #define MODBUS_TIMEOUT 4
@@ -264,23 +186,6 @@ extern RemoteDebug Debug;
 #define COMM_TIMEOUT 11                                                         // Timeout for MainsMeter
 #define COMM_EVTIMEOUT 8*NR_EVSES                                               // Timeout for EV Energy Meters
 
-#define STATE_A 0                                                               // A Vehicle not connected
-#define STATE_B 1                                                               // B Vehicle connected / not ready to accept energy
-#define STATE_C 2                                                               // C Vehicle connected / ready to accept energy / ventilation not required
-#define STATE_D 3                                                               // D Vehicle connected / ready to accept energy / ventilation required (not implemented)
-#define STATE_COMM_B 4                                                          // E State change request A->B (set by node)
-#define STATE_COMM_B_OK 5                                                       // F State change A->B OK (set by master)
-#define STATE_COMM_C 6                                                          // G State change request B->C (set by node)
-#define STATE_COMM_C_OK 7                                                       // H State change B->C OK (set by master)
-#define STATE_ACTSTART 8                                                        // I Activation mode in progress
-#define STATE_B1 9                                                              // J Vehicle connected / EVSE not ready to deliver energy: no PWM signal
-#define STATE_C1 10                                                             // K Vehicle charging / EVSE not ready to deliver energy: no PWM signal (temp state when stopping charge from EVSE)
-#define STATE_MODEM_REQUEST 11                                                          // L Vehicle connected / requesting ISO15118 communication, 0% duty
-#define STATE_MODEM_WAIT 12                                                          // M Vehicle connected / requesting ISO15118 communication, 5% duty
-#define STATE_MODEM_DONE 13                                                // Modem communication succesful, SoCs extracted. Here, re-plug vehicle
-#define STATE_MODEM_DENIED 14                                                // Modem access denied based on EVCCID, re-plug vehicle and try again
-
-#define NOSTATE 255
 
 #define PILOT_12V 1                                                             // State A - vehicle disconnected
 #define PILOT_9V 2                                                              // State B - vehicle connected
@@ -290,21 +195,14 @@ extern RemoteDebug Debug;
 #define PILOT_NOK 0
 
 
-#define NO_ERROR 0
-#define LESS_6A 1
-#define CT_NOCOMM 2
-#define TEMP_HIGH 4
-#define EV_NOCOMM 8
-#define RCM_TRIPPED 16                                                          // RCM tripped. >6mA DC residual current detected.
-#define NO_SUN 32
-#define Test_IO 64
-#define BL_FLASH 128
+
 
 #define LED_OFF 255
+#define LED_ON 0
 #define STATE_A_LED_BRIGHTNESS 60
-#define STATE_B_LED_BRIGHTNESS 0
-#define ERROR_LED_BRIGHTNESS 0
-#define WAITING_LED_BRIGHTNESS 0
+#define STATE_B_LED_BRIGHTNESS LED_ON
+#define ERROR_LED_BRIGHTNESS LED_ON
+#define WAITING_LED_BRIGHTNESS LED_ON
 #define LCD_BRIGHTNESS 255
 
 
@@ -368,59 +266,7 @@ extern RemoteDebug Debug;
 #define STATUS_TEMP 74                                                          // 0x000A: Temperature (RO)
 #define STATUS_SERIAL 75                                                        // 0x000B: Serial number (RO)
 
-// Node specific configuration
-#define MENU_ENTER 1
-#define MENU_CONFIG 2                                                           // 0x0100: Configuration
-#define MENU_LOCK 3                                                             // 0x0101: Cable lock
-#define MENU_MIN 4                                                              // 0x0102: MIN Charge Current the EV will accept
-#define MENU_MAX 5                                                              // 0x0103: MAX Charge Current for this EVSE
-#define MENU_LOADBL 6                                                           // 0x0104: Load Balance
-#define MENU_SWITCH 7                                                           // 0x0105: External Start/Stop button
-#define MENU_RCMON 8                                                            // 0x0106: Residual Current Monitor
-#define MENU_RFIDREADER 9                                                       // 0x0107: Use RFID reader
-#define MENU_EVMETER 10                                                         // 0x0108: Type of EV electric meter
-#define MENU_EVMETERADDRESS 11                                                  // 0x0109: Address of EV electric meter
 
-// System configuration (same on all SmartEVSE in a LoadBalancing setup)
-#define MENU_MODE 12                                                            // 0x0200: EVSE mode
-#define MENU_CIRCUIT 13                                                         // 0x0201: EVSE Circuit max Current
-#define MENU_GRID 14                                                            // 0x0202: Grid type to which the Sensorbox is connected
-#define MENU_CAL 15                                                             // 0x0203: CT calibration value
-#define MENU_MAINS 16                                                           // 0x0204: Max Mains Current
-#define MENU_START 17                                                           // 0x0205: Surplus energy start Current
-#define MENU_STOP 18                                                            // 0x0206: Stop solar charging at 6A after this time
-#define MENU_IMPORT 19                                                          // 0x0207: Allow grid power when solar charging
-#define MENU_MAINSMETER 20                                                      // 0x0208: Type of Mains electric meter
-#define MENU_MAINSMETERADDRESS 21                                               // 0x0209: Address of Mains electric meter
-#define MENU_EMCUSTOM_ENDIANESS 22                                              // 0x020D: Byte order of custom electric meter
-#define MENU_EMCUSTOM_DATATYPE 23                                               // 0x020E: Data type of custom electric meter
-#define MENU_EMCUSTOM_FUNCTION 24                                               // 0x020F: Modbus Function (3/4) of custom electric meter
-#define MENU_EMCUSTOM_UREGISTER 25                                              // 0x0210: Register for Voltage (V) of custom electric meter
-#define MENU_EMCUSTOM_UDIVISOR 26                                               // 0x0211: Divisor for Voltage (V) of custom electric meter (10^x)
-#define MENU_EMCUSTOM_IREGISTER 27                                              // 0x0212: Register for Current (A) of custom electric meter
-#define MENU_EMCUSTOM_IDIVISOR 28                                               // 0x0213: Divisor for Current (A) of custom electric meter (10^x)
-#define MENU_EMCUSTOM_PREGISTER 29                                              // 0x0214: Register for Power (W) of custom electric meter
-#define MENU_EMCUSTOM_PDIVISOR 30                                               // 0x0215: Divisor for Power (W) of custom electric meter (10^x)
-#define MENU_EMCUSTOM_EREGISTER 31                                              // 0x0216: Register for Energy (kWh) of custom electric meter
-#define MENU_EMCUSTOM_EDIVISOR 32                                               // 0x0217: Divisor for Energy (kWh) of custom electric meter (10^x)
-#define MENU_EMCUSTOM_READMAX 33                                                // 0x0218: Maximum register read (ToDo)
-#define MENU_WIFI 34                                                            // 0x0219: WiFi mode
-#define MENU_AUTOUPDATE 35
-#define MENU_C2 36
-#define MENU_MAX_TEMP 37
-#define MENU_SUMMAINS 38
-#if ENABLE_OCPP == 0
-#define MENU_OFF 39                                                             // so access bit is reset and charging stops when pressing < button 2 seconds
-#define MENU_ON 40                                                              // so access bit is set and charging starts when pressing > button 2 seconds
-#define MENU_EXIT 41
-#else
-#define MENU_OCPP 39                                                            // OCPP Disable / Enable / Further modes
-#define MENU_OFF 40                                                             // so access bit is reset and charging stops when pressing < button 2 seconds
-#define MENU_ON 41                                                              // so access bit is set and charging starts when pressing > button 2 seconds
-#define MENU_EXIT 42
-#endif
-
-#define MENU_STATE 50
 
 #define _RSTB_0 digitalWrite(PIN_LCD_RST, LOW);
 #define _RSTB_1 digitalWrite(PIN_LCD_RST, HIGH);
@@ -464,8 +310,8 @@ typedef enum mb_datatype {
 
 extern portMUX_TYPE rtc_spinlock;   //TODO: Will be placed in the appropriate position after the rtc module is finished.
 
-#define RTC_ENTER_CRITICAL()    portENTER_CRITICAL(&rtc_spinlock)
-#define RTC_EXIT_CRITICAL()     portEXIT_CRITICAL(&rtc_spinlock)
+// #define RTC_ENTER_CRITICAL()    portENTER_CRITICAL(&rtc_spinlock)
+// #define RTC_EXIT_CRITICAL()     portEXIT_CRITICAL(&rtc_spinlock)
 
 
 extern String APpassword;
@@ -606,13 +452,7 @@ struct EMstruct {
 
 extern struct EMstruct EMConfig[EM_CUSTOM + 1];
 
-struct DelayedTimeStruct {
-    uint32_t epoch2;        // in case of Delayed Charging the StartTime in epoch2; if zero we are NOT Delayed Charging
-                            // epoch2 is the number of seconds since 1/1/2023 00:00 UTC, which equals epoch 1672531200
-                            // we avoid using epoch so we don't need expensive 64bits arithmetics with difftime
-                            // and we can store dates until 7/2/2159
-    int32_t diff;           // StartTime minus current time in seconds
-};
+
 
 #define EPOCH2_OFFSET 1672531200
 

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <SPI.h>
-#include <Preferences.h>
+// #include <Preferences.h>
 
 #include <FS.h>
 
@@ -84,9 +84,9 @@ ModbusClientRTU MBclient(PIN_RS485_DIR);
 hw_timer_t * timerA = NULL;
 Preferences preferences;
 
-static esp_adc_cal_characteristics_t * adc_chars_CP;
-static esp_adc_cal_characteristics_t * adc_chars_PP;
-static esp_adc_cal_characteristics_t * adc_chars_Temperature;
+// static esp_adc_cal_characteristics_t * adc_chars_CP;
+// static esp_adc_cal_characteristics_t * adc_chars_PP;
+// static esp_adc_cal_characteristics_t * adc_chars_Temperature;
 
 struct ModBus MB;          // Used by SmartEVSE fuctions
 
@@ -110,7 +110,7 @@ uint16_t MaxSumMains = MAX_SUMMAINS;                                        // M
 uint16_t MaxCurrent = MAX_CURRENT;                                          // Max Charge current (A)
 uint16_t MinCurrent = MIN_CURRENT;                                          // Minimal current the EV is happy with (A)
 uint16_t ICal = ICAL;                                                       // CT calibration value
-uint8_t Mode = MODE;                                                        // EVSE mode (0:Normal / 1:Smart / 2:Solar)
+// uint8_t Mode = MODE;                                                        // EVSE mode (0:Normal / 1:Smart / 2:Solar)
 uint32_t CurrentPWM = 0;                                                    // Current PWM duty cycle value (0 - 1024)
 int8_t InitialSoC = -1;                                                     // State of charge of car
 int8_t FullSoC = -1;                                                        // SoC car considers itself fully charged
@@ -127,17 +127,16 @@ uint8_t Lock = LOCK;                                                        // C
 uint16_t MaxCircuit = MAX_CIRCUIT;                                          // Max current of the EVSE circuit (A)
 uint8_t Config = CONFIG;                                                    // Configuration (0:Socket / 1:Fixed Cable)
 uint8_t LoadBl = LOADBL;                                                    // Load Balance Setting (0:Disable / 1:Master / 2-8:Node)
-uint8_t Switch = SWITCH;                                                    // External Switch (0:Disable / 1:Access B / 2:Access S / 3:Smart-Solar B / 4:Smart-Solar S)
                                                                             // B=momentary push <B>utton, S=toggle <S>witch
 uint8_t RCmon = RC_MON;                                                     // Residual Current Monitor (0:Disable / 1:Enable)
 uint8_t AutoUpdate = AUTOUPDATE;                                            // Automatic Firmware Update (0:Disable / 1:Enable)
 uint16_t StartCurrent = START_CURRENT;
 uint16_t StopTime = STOP_TIME;
 uint16_t ImportCurrent = IMPORT_CURRENT;
-struct DelayedTimeStruct DelayedStartTime;
-struct DelayedTimeStruct DelayedStopTime;
+// struct DelayedTimeStruct DelayedStartTime;
+// struct DelayedTimeStruct DelayedStopTime;
 uint8_t DelayedRepeat;                                                      // 0 = no repeat, 1 = daily repeat
-uint8_t MainsMeter = MAINS_METER;                                           // Type of Mains electric meter (0: Disabled / Constants EM_*)
+// uint8_t MainsMeter = MAINS_METER;                                           // Type of Mains electric meter (0: Disabled / Constants EM_*)
 uint8_t MainsMeterAddress = MAINS_METER_ADDRESS;
 uint8_t Grid = GRID;                                                        // Type of Grid connected to Sensorbox (0:4Wire / 1:3Wire )
 uint8_t EVMeter = EV_METER;                                                 // Type of EV electric meter (0: Disabled / Constants EM_*)
@@ -151,7 +150,7 @@ String APpassword = "00000000";
 uint8_t Initialized = INITIALIZED;                                          // When first powered on, the settings need to be initialized.
 String TZinfo = "";                                                         // contains POSIX time string
 
-EnableC2_t EnableC2 = ENABLE_C2;                                            // Contactor C2
+// EnableC2_t EnableC2 = ENABLE_C2;                                            // Contactor C2
 uint16_t maxTemp = MAX_TEMPERATURE;
 
 int16_t Irms[3]={0, 0, 0};                                                  // Momentary current per Phase (23 = 2.3A) (resolution 100mA)
@@ -159,15 +158,14 @@ int16_t Irms_EV[3]={0, 0, 0};                                               // M
 uint8_t Nr_Of_Phases_Charging = 0;                                          // 0 = Undetected, 1,2,3 = nr of phases that was detected at the start of this charging session
 Single_Phase_t Switching_To_Single_Phase = FALSE;
 
-uint8_t State = STATE_A;
-uint8_t ErrorFlags = NO_ERROR;
+// uint8_t State = STATE_A;
 uint8_t NextState;
-uint8_t pilot;
+// uint8_t pilot;
 uint8_t prev_pilot;
 
 uint16_t MaxCapacity;                                                       // Cable limit (A) (limited by the wire in the charge cable, set automatically, or manually if Config=Fixed Cable)
 uint16_t ChargeCurrent;                                                     // Calculated Charge Current (Amps *10)
-uint16_t OverrideCurrent = 0;                                               // Temporary assigned current (Amps *10) (modbus)
+// uint16_t OverrideCurrent = 0;                                               // Temporary assigned current (Amps *10) (modbus)
 int16_t Imeasured = 0;                                                      // Max of all Phases (Amps *10) of mains power
 int16_t Imeasured_EV = 0;                                                   // Max of all Phases (Amps *10) of EV power
 int16_t Isum = 0;                                                           // Sum of all measured Phases (Amps *10) (can be negative)
@@ -206,18 +204,18 @@ struct {
 uint8_t lock1 = 0, lock2 = 1;
 uint8_t MainsMeterTimeout = COMM_TIMEOUT;                                   // MainsMeter communication timeout (sec)
 uint8_t EVMeterTimeout = COMM_EVTIMEOUT;                                    // EV Meter communication Timeout (sec)
-uint16_t BacklightTimer = 0;                                                // Backlight timer (sec)
-uint8_t BacklightSet = 0;
-uint8_t LCDTimer = 0;
-uint8_t AccessTimer = 0;
+// uint16_t BacklightTimer = 0;                                                // Backlight timer (sec)
+// uint8_t BacklightSet = 0;
+// uint8_t LCDTimer = 0;
+// uint8_t AccessTimer = 0;
 int8_t TempEVSE = 0;                                                        // Temperature EVSE in deg C (-50 to +125)
-uint8_t ButtonState = 0x0f;                                                 // Holds latest push Buttons state (LSB 3:0)
-uint8_t OldButtonState = 0x0f;                                              // Holds previous push Buttons state (LSB 3:0)
-uint8_t LCDNav = 0;
-uint8_t SubMenu = 0;
-uint32_t ScrollTimer = 0;
-uint8_t LCDupdate = 0;                                                      // flag to update the LCD every 1000ms
-uint8_t ChargeDelay = 0;                                                    // Delays charging at least 60 seconds in case of not enough current available.
+// uint8_t LCDNav = 0;
+// uint32_t ScrollTimer = 0;
+// uint8_t SubMenu = 0;
+
+
+// uint8_t LCDupdate = 0;                                                      // flag to update the LCD every 1000ms
+//uint8_t ChargeDelay = 0;                                                    // Delays charging at least 60 seconds in case of not enough current available.
 uint8_t C1Timer = 0;
 uint8_t ModemStage = 0;                                                     // 0: Modem states will be executed when Modem is enabled 1: Modem stages will be skipped, as SoC is already extracted
 int8_t DisconnectTimeCounter = -1;                                          // Count for how long we're disconnected, so we can more reliably throw disconnect event. -1 means counter is disabled
@@ -226,12 +224,12 @@ uint8_t ToModemDoneStateTimer = 0;                                          // T
 uint8_t LeaveModemDoneStateTimer = 0;                                       // Timer used from STATE_MODEM_DONE to other, usually STATE_B
 uint8_t LeaveModemDeniedStateTimer = 0;                                     // Timer used from STATE_MODEM_DENIED to STATE_B to re-try authentication
 uint8_t NoCurrent = 0;                                                      // counts overcurrent situations.
-uint8_t TestState = 0;
+// uint8_t TestState = 0;
 uint8_t ModbusRequest = 0;                                                  // Flag to request Modbus information
-uint8_t NodeNewMode = 0;
+// uint8_t NodeNewMode = 0;
 uint8_t MenuItems[MENU_EXIT];
-uint8_t Access_bit = 0;                                                     // 0:No Access 1:Access to SmartEVSE
-uint16_t CardOffset = CARD_OFFSET;                                          // RFID card used in Enable One mode
+// uint8_t Access_bit = 0;                                                     // 0:No Access 1:Access to SmartEVSE
+// uint16_t CardOffset = CARD_OFFSET;                                          // RFID card used in Enable One mode
 
 uint8_t ConfigChanged = 0;
 uint32_t serialnr = 0;
@@ -244,8 +242,8 @@ int32_t EnergyCharged = 0;                                                  // k
 int32_t EnergyMeterStart = 0;                                               // kWh meter value is stored once EV is connected to EVSE (Wh)
 int16_t PowerMeasured = 0;                                                  // Measured Charge power in Watt by kWh meter
 uint8_t RFIDstatus = 0;
-bool PilotDisconnected = false;
-uint8_t PilotDisconnectTime = 0;                                            // Time the Control Pilot line should be disconnected (Sec)
+// bool PilotDisconnected = false;
+// uint8_t PilotDisconnectTime = 0;                                            // Time the Control Pilot line should be disconnected (Sec)
 
 int32_t EnergyEV = 0;                                                       // Wh -> EV_import_active_energy - EV_export_active_energy
 int32_t Mains_export_active_energy = 0;                                     // Mainsmeter exported active energy, only for API purposes so you can guard the
@@ -255,12 +253,12 @@ int32_t Mains_import_active_energy = 0;                                     // M
 int32_t EV_export_active_energy = 0;
 int32_t EV_import_active_energy = 0;
 int32_t CM[3]={0, 0, 0};
-uint8_t ResetKwh = 2;                                                       // if set, reset EV kwh meter at state transition B->C
+// uint8_t ResetKwh = 2;                                                       // if set, reset EV kwh meter at state transition B->C
                                                                             // cleared when charging, reset to 1 when disconnected (state A)
 uint8_t ActivationMode = 0, ActivationTimer = 0;
-volatile uint16_t adcsample = 0;
-volatile uint16_t ADCsamples[25];                                           // declared volatile, as they are used in a ISR
-volatile uint8_t sampleidx = 0;
+// volatile uint16_t adcsample = 0;
+// volatile uint16_t ADCsamples[25];                                           // declared volatile, as they are used in a ISR
+// volatile uint8_t sampleidx = 0;
 char str[20];
 bool LocalTimeSet = false;
 
@@ -323,45 +321,6 @@ unsigned long OcppStopReadingSyncTime; // Stop value synchronization: delay Stop
 #endif //ENABLE_OCPP
 
 
-// Some low level stuff here to setup the ADC, and perform the conversion.
-//
-//
-uint16_t IRAM_ATTR local_adc1_read(int channel) {
-    uint16_t adc_value;
-
-    SENS.sar_read_ctrl.sar1_dig_force = 0;                      // switch SARADC into RTC channel 
-    SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PU;  // adc_power_on
-    RTCIO.hall_sens.xpd_hall = false;                           // disable other peripherals
-    
-    //adc_ll_amp_disable()  // Close ADC AMP module if don't use it for power save.
-    SENS.sar_meas_wait2.force_xpd_amp = SENS_FORCE_XPD_AMP_PD;  // channel is set in the convert function
-    // disable FSM, it's only used by the LNA.
-    SENS.sar_meas_ctrl.amp_rst_fb_fsm = 0; 
-    SENS.sar_meas_ctrl.amp_short_ref_fsm = 0;
-    SENS.sar_meas_ctrl.amp_short_ref_gnd_fsm = 0;
-    SENS.sar_meas_wait1.sar_amp_wait1 = 1;
-    SENS.sar_meas_wait1.sar_amp_wait2 = 1;
-    SENS.sar_meas_wait2.sar_amp_wait3 = 1; 
-
-    // adc_hal_set_controller(ADC_NUM_1, ADC_CTRL_RTC);         //Set controller
-    // see esp-idf/components/hal/esp32/include/hal/adc_ll.h
-    SENS.sar_read_ctrl.sar1_dig_force       = 0;                // 1: Select digital control;       0: Select RTC control.
-    SENS.sar_meas_start1.meas1_start_force  = 1;                // 1: SW control RTC ADC start;     0: ULP control RTC ADC start.
-    SENS.sar_meas_start1.sar1_en_pad_force  = 1;                // 1: SW control RTC ADC bit map;   0: ULP control RTC ADC bit map;
-    SENS.sar_touch_ctrl1.xpd_hall_force     = 1;                // 1: SW control HALL power;        0: ULP FSM control HALL power.
-    SENS.sar_touch_ctrl1.hall_phase_force   = 1;                // 1: SW control HALL phase;        0: ULP FSM control HALL phase.
-
-    // adc_hal_convert(ADC_NUM_1, channel, &adc_value);
-    // see esp-idf/components/hal/esp32/include/hal/adc_ll.h
-    SENS.sar_meas_start1.sar1_en_pad = (1 << channel);          // select ADC channel to sample on
-    while (SENS.sar_slave_addr1.meas_status != 0);              // wait for conversion to be idle (blocking)
-    SENS.sar_meas_start1.meas1_start_sar = 0;         
-    SENS.sar_meas_start1.meas1_start_sar = 1;                   // start ADC conversion
-    while (SENS.sar_meas_start1.meas1_done_sar == 0);           // wait (blocking) for conversion to finish
-    adc_value = SENS.sar_meas_start1.meas1_data_sar;            // read ADC value from register
-
-    return adc_value;
-}
 
 
 
@@ -582,31 +541,7 @@ void ProximityPin() {
 }
 
 
-// Determine the state of the Pilot signal
-//
-uint8_t Pilot() {
 
-    uint32_t sample, Min = 3300, Max = 0;
-    uint32_t voltage;
-    uint8_t n;
-
-    // calculate Min/Max of last 25 CP measurements
-    for (n=0 ; n<25 ;n++) {
-        sample = ADCsamples[n];
-        voltage = esp_adc_cal_raw_to_voltage( sample, adc_chars_CP);        // convert adc reading to voltage
-        if (voltage < Min) Min = voltage;                                   // store lowest value
-        if (voltage > Max) Max = voltage;                                   // store highest value
-    }    
-    //_LOG_A("min:%u max:%u\n",Min ,Max);
-
-    // test Min/Max against fixed levels
-    if (Min >= 3055 ) return PILOT_12V;                                     // Pilot at 12V (min 11.0V)
-    if ((Min >= 2735) && (Max < 3055)) return PILOT_9V;                     // Pilot at 9V
-    if ((Min >= 2400) && (Max < 2735)) return PILOT_6V;                     // Pilot at 6V
-    if ((Min >= 2000) && (Max < 2400)) return PILOT_3V;                     // Pilot at 3V
-    if ((Min > 100) && (Max < 300)) return PILOT_DIODE;                     // Diode Check OK
-    return PILOT_NOK;                                                       // Pilot NOT ok
-}
 
 
 /**
@@ -645,230 +580,12 @@ const char * getErrorNameWeb(uint8_t ErrorCode) {
     else return "Multiple Errors";
 }
 
-/**
- * Set EVSE mode
- * 
- * @param uint8_t Mode
- */
-void setMode(uint8_t NewMode) {
-    // If mainsmeter disabled we can only run in Normal Mode
-    if (!MainsMeter && NewMode != MODE_NORMAL)
-        return;
 
-    // Take care of extra conditionals/checks for custom features
-    setAccess(!DelayedStartTime.epoch2); //if DelayedStartTime not zero then we are Delayed Charging
-    if (NewMode == MODE_SOLAR) {
-        // Reset OverrideCurrent if mode is SOLAR
-        OverrideCurrent = 0;
-    }
 
-    // when switching modes, we just keep charging at the phases we were charging at;
-    // it's only the regulation algorithm that is changing...
-    // EXCEPT when EnableC2 == Solar Off, because we would expect C2 to be off when in Solar Mode and EnableC2 == Solar Off
-    // and also the other way around, multiple phases might be wanted when changing from Solar to Normal or Smart
-    bool switchOnLater = false;
-    if (EnableC2 == SOLAR_OFF) {
-        if ((Mode != MODE_SOLAR && NewMode == MODE_SOLAR) || (Mode == MODE_SOLAR && NewMode != MODE_SOLAR)) {
-            //we are switching from non-solar to solar
-            //since we EnableC2 == SOLAR_OFF C2 is turned On now, and should be turned off
-            setAccess(0);                                                       //switch to OFF
-            switchOnLater = true;
-        }
-    }
 
-#if MQTT
-    // Update MQTT faster
-    lastMqttUpdate = 10;
-#endif
 
-    if (NewMode == MODE_SMART) {
-        ErrorFlags &= ~(NO_SUN | LESS_6A);                                      // Clear All errors
-        setSolarStopTimer(0);                                                   // Also make sure the SolarTimer is disabled.
-    }
-    ChargeDelay = 0;                                                            // Clear any Chargedelay
-    BacklightTimer = BACKLIGHT;                                                 // Backlight ON
-    if (Mode != NewMode) NodeNewMode = NewMode + 1;
-    Mode = NewMode;    
 
-    if (switchOnLater)
-        setAccess(1);
 
-    //make mode and start/stoptimes persistent on reboot
-    if (preferences.begin("settings", false) ) {                        //false = write mode
-        preferences.putUChar("Mode", Mode);
-        preferences.putULong("DelayedStartTim", DelayedStartTime.epoch2); //epoch2 only needs 4 bytes
-        preferences.putULong("DelayedStopTime", DelayedStopTime.epoch2);   //epoch2 only needs 4 bytes
-        preferences.end();
-    }
-}
-/**
- * Set the solar stop timer
- * 
- * @param unsigned int Timer (seconds)
- */
-void setSolarStopTimer(uint16_t Timer) {
-    SolarStopTimer = Timer;
-}
-
-/**
- * Checks all parameters to determine whether
- * we are going to force single phase charging
- * Returns true if we are going to do single phase charging
- * Returns false if we are going to do (traditional) 3 phase charing
- * This is only relevant on a 3f mains and 3f car installation!
- * 1f car will always charge 1f undetermined by CONTACTOR2
- */
-uint8_t Force_Single_Phase_Charging() {                                         // abbreviated to FSPC
-    switch (EnableC2) {
-        case NOT_PRESENT:                                                       //no use trying to switch a contactor on that is not present
-        case ALWAYS_OFF:
-            return 1;
-        case SOLAR_OFF:
-            return (Mode == MODE_SOLAR);
-        case AUTO:
-        case ALWAYS_ON:
-            return 0;   //3f charging
-    }
-    //in case we don't know, stick to 3f charging
-    return 0;
-}
-
-void setStatePowerUnavailable(void) {
-    if (State == STATE_A)
-       return;
-    //State changes between A,B,C,D are caused by EV or by the user
-    //State changes between x1 and x2 are created by the EVSE
-    //State changes between x1 and x2 indicate availability (x2) of unavailability (x1) of power supply to the EV
-    if (State == STATE_C) setState(STATE_C1);                       // If we are charging, tell EV to stop charging
-    else if (State != STATE_C1) setState(STATE_B1);                 // If we are not in State C1, switch to State B1
-}
-
-void setState(uint8_t NewState) {
-    if (State != NewState) {
-        char Str[50];
-        snprintf(Str, sizeof(Str), "%02d:%02d:%02d STATE %s -> %s\n",timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec, getStateName(State), getStateName(NewState) );
-
-        _LOG_A("%s",Str);
-    }
-
-    switch (NewState) {
-        case STATE_B1:
-            if (!ChargeDelay) ChargeDelay = 3;                                  // When entering State B1, wait at least 3 seconds before switching to another state.
-            if (State != STATE_B1 && State != STATE_B && !PilotDisconnected) {
-                PILOT_DISCONNECTED;
-                PilotDisconnected = true;
-                PilotDisconnectTime = 5;                                       // Set PilotDisconnectTime to 5 seconds
-
-                _LOG_A("Pilot Disconnected\n");
-            }
-            // fall through
-        case STATE_A:                                                           // State A1
-            CONTACTOR1_OFF;  
-            CONTACTOR2_OFF;  
-            SetCPDuty(1024);                                                    // PWM off,  channel 0, duty cycle 100%
-            timerAlarmWrite(timerA, PWM_100, true);                             // Alarm every 1ms, auto reload 
-            if (NewState == STATE_A) {
-                ErrorFlags &= ~NO_SUN;
-                ErrorFlags &= ~LESS_6A;
-                ChargeDelay = 0;
-                // Reset Node
-                Node[0].Timer = 0;
-                Node[0].IntTimer = 0;
-                Node[0].Phases = 0;
-                Node[0].MinCurrent = 0;                                         // Clear ChargeDelay when disconnected.
-            }
-
-#if MODEM
-            if (DisconnectTimeCounter == -1){
-                DisconnectTimeCounter = 0;                                      // Start counting disconnect time. If longer than 60 seconds, throw DisconnectEvent
-            }
-            break;
-        case STATE_MODEM_REQUEST: // After overriding PWM, and resetting the safe state is 10% PWM. To make sure communication recovers after going to normal, we do this. Ugly and temporary
-            ToModemWaitStateTimer = 5;
-            DisconnectTimeCounter = -1;                                         // Disable Disconnect timer. Car is connected
-            SetCPDuty(1024);
-            CONTACTOR1_OFF;
-            CONTACTOR2_OFF;
-            break;
-        case STATE_MODEM_WAIT: 
-            SetCPDuty(50);
-            ToModemDoneStateTimer = 60;
-            break;
-        case STATE_MODEM_DONE:  // This state is reached via STATE_MODEM_WAIT after 60s (timeout condition, nothing received) or after REST request (success, shortcut to immediate charging).
-            CP_OFF;
-            DisconnectTimeCounter = -1;                                         // Disable Disconnect timer. Car is connected
-            LeaveModemDoneStateTimer = 5;                                       // Disconnect CP for 5 seconds, restart charging cycle but this time without the modem steps.
-#endif
-            break;
-        case STATE_B:
-#if MODEM
-            CP_ON;
-            DisconnectTimeCounter = -1;                                         // Disable Disconnect timer. Car is connected
-#endif
-            CONTACTOR1_OFF;
-            CONTACTOR2_OFF;
-            timerAlarmWrite(timerA, PWM_95, false);                             // Enable Timer alarm, set to diode test (95%)
-            SetCurrent(ChargeCurrent);                                          // Enable PWM
-            break;      
-        case STATE_C:                                                           // State C2
-            ActivationMode = 255;                                               // Disable ActivationMode
-
-            if (Switching_To_Single_Phase == GOING_TO_SWITCH) {
-                    CONTACTOR2_OFF;
-                    setSolarStopTimer(0); //TODO still needed? now we switched contactor2 off, review if we need to stop solar charging
-                    //Nr_Of_Phases_Charging = 1; this will be detected automatically
-                    Switching_To_Single_Phase = AFTER_SWITCH;                   // we finished the switching process,
-                                                                                // BUT we don't know which is the single phase
-            }
-
-            CONTACTOR1_ON;
-            if (!Force_Single_Phase_Charging() && Switching_To_Single_Phase != AFTER_SWITCH) {                               // in AUTO mode we start with 3phases
-                CONTACTOR2_ON;                                                  // Contactor2 ON
-            }
-            LCDTimer = 0;
-            break;
-        case STATE_C1:
-            SetCPDuty(1024);                                                    // PWM off,  channel 0, duty cycle 100%
-            timerAlarmWrite(timerA, PWM_100, true);                             // Alarm every 1ms, auto reload 
-                                                                                // EV should detect and stop charging within 3 seconds
-            C1Timer = 6;                                                        // Wait maximum 6 seconds, before forcing the contactor off.
-            ChargeDelay = 15;
-            break;
-        default:
-            break;
-    }
-    
-    BalancedState[0] = NewState;
-    State = NewState;
-
-#if MQTT
-    // Update MQTT faster
-    lastMqttUpdate = 10;
-#endif
-
-    // BacklightTimer = BACKLIGHT;                                                 // Backlight ON
-}
-
-void setAccess(bool Access) {
-    Access_bit = Access;
-    if (Access == 0) {
-        //TODO:setStatePowerUnavailable() ?
-        if (State == STATE_C) setState(STATE_C1);                               // Determine where to switch to.
-        else if (State != STATE_C1 && (State == STATE_B || State == STATE_MODEM_REQUEST || State == STATE_MODEM_WAIT || State == STATE_MODEM_DONE || State == STATE_MODEM_DENIED)) setState(STATE_B1);
-    }
-
-    //make mode and start/stoptimes persistent on reboot
-    if (preferences.begin("settings", false) ) {                        //false = write mode
-        preferences.putUChar("Access", Access_bit);
-        preferences.putUChar("CardOffset", CardOffset);
-        preferences.end();
-    }
-
-#if MQTT
-    // Update MQTT faster
-    lastMqttUpdate = 10;
-#endif
-}
 
 /**
  * Returns the known battery charge rate if the data is not too old.
@@ -1976,109 +1693,7 @@ void CalcIsum(void) {
 }
 
 
-// CheckSwitch (SW input)
-//
-void CheckSwitch(void)
-{
-    static uint8_t RB2count = 0, RB2last = 1, RB2low = 0;
-    static unsigned long RB2Timer = 0;                                                 // 1500ms
 
-    // External switch changed state?
-    if ( (digitalRead(PIN_SW_IN) != RB2last) || RB2low) {
-        // make sure that noise on the input does not switch
-        if (RB2count++ > 20 || RB2low) {
-            RB2last = digitalRead(PIN_SW_IN);
-            if (RB2last == 0) {
-                // Switch input pulled low
-                switch (Switch) {
-                    case 1: // Access Button
-                        setAccess(!Access_bit);                             // Toggle Access bit on/off
-                        _LOG_I("Access: %d\n", Access_bit);
-                        break;
-                    case 2: // Access Switch
-                        setAccess(true);
-                        break;
-                    case 3: // Smart-Solar Button or hold button for 1,5 second to STOP charging
-                        if (RB2low == 0) {
-                            RB2low = 1;
-                            RB2Timer = millis();
-                        }
-                        if (RB2low && millis() > RB2Timer + 1500) {
-                            if (State == STATE_C) {
-                                setState(STATE_C1);
-                                if (!TestState) ChargeDelay = 15;           // Keep in State B for 15 seconds, so the Charge cable can be removed.
-                            RB2low = 2;
-                            }
-                        }
-                        break;
-                    case 4: // Smart-Solar Switch
-                        if (Mode == MODE_SOLAR) {
-                            setMode(MODE_SMART);
-                            setSolarStopTimer(0);                           // Also make sure the SolarTimer is disabled.
-                        }
-                        break;
-                    default:
-                        if (State == STATE_C) {                             // Menu option Access is set to Disabled
-                            setState(STATE_C1);
-                            if (!TestState) ChargeDelay = 15;               // Keep in State B for 15 seconds, so the Charge cable can be removed.
-                        }
-                        break;
-                }
-
-                // Reset RCM error when button is pressed
-                // RCM was tripped, but RCM level is back to normal
-                if (RCmon == 1 && (ErrorFlags & RCM_TRIPPED) && digitalRead(PIN_RCM_FAULT) == LOW) {
-                    // Clear RCM error
-                    ErrorFlags &= ~RCM_TRIPPED;
-                }
-                // Also light up the LCD backlight
-                // BacklightTimer = BACKLIGHT;                                 // Backlight ON
-
-            } else {
-                // Switch input released
-                switch (Switch) {
-                    case 2: // Access Switch
-                        setAccess(false);
-                        break;
-                    case 3: // Smart-Solar Button
-                        if (RB2low != 2) {
-                            if (Mode == MODE_SMART) {
-                                setMode(MODE_SOLAR);
-                            } else if (Mode == MODE_SOLAR) {
-                                setMode(MODE_SMART);
-                            }
-                            ErrorFlags &= ~(NO_SUN | LESS_6A);                   // Clear All errors
-                            ChargeDelay = 0;                                // Clear any Chargedelay
-                            setSolarStopTimer(0);                           // Also make sure the SolarTimer is disabled.
-                            LCDTimer = 0;
-                        }
-                        RB2low = 0;
-                        break;
-                    case 4: // Smart-Solar Switch
-                        if (Mode == MODE_SMART) setMode(MODE_SOLAR);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            RB2count = 0;
-        }
-    } else RB2count = 0;
-
-    // Residual current monitor active, and DC current > 6mA ?
-    if (RCmon == 1 && digitalRead(PIN_RCM_FAULT) == HIGH) {                   
-        delay(1);
-        // check again, to prevent voltage spikes from tripping the RCM detection
-        if (digitalRead(PIN_RCM_FAULT) == HIGH) {                           
-            if (State) setState(STATE_B1);
-            ErrorFlags = RCM_TRIPPED;
-            LCDTimer = 0;                                                   // display the correct error message on the LCD
-        }
-    }
-
-
-}
 
 
 
