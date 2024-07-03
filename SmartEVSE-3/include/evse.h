@@ -140,7 +140,6 @@
 #define CONFIG 0                                                                // Configuration: 0= TYPE 2 socket, 1= Fixed Cable
 #define LOADBL 0                                                                // Load Balancing disabled
 #define CHARGEDELAY 60                                                          // Seconds to wait after overcurrent, before trying again
-#define RFIDLOCKTIME 60                                                         // Seconds delay for the EVSE to lock again (RFIDreader = EnableOne)
 #define START_CURRENT 4                                                         // Start charging when surplus current on sum of all phases exceeds 4A (Solar)
 #define STOP_TIME 10                                                            // Stop charging after 10 minutes at MIN charge current (Solar)
 #define IMPORT_CURRENT 0                                                        // Allow the use of grid power when solar charging (Amps)
@@ -164,7 +163,6 @@
 #define EMCUSTOM_PDIVISOR 8
 #define EMCUSTOM_EREGISTER 0
 #define EMCUSTOM_EDIVISOR 8
-#define RFID_READER 0
 #define ACCESS_BIT 1
 #define WIFI_MODE 0
 #define AP_PASSWORD "00000000"
@@ -187,12 +185,7 @@
 #define COMM_EVTIMEOUT 8*NR_EVSES                                               // Timeout for EV Energy Meters
 
 
-#define PILOT_12V 1                                                             // State A - vehicle disconnected
-#define PILOT_9V 2                                                              // State B - vehicle connected
-#define PILOT_6V 3                                                              // State C - EV charge
-#define PILOT_3V 4
-#define PILOT_DIODE 5
-#define PILOT_NOK 0
+
 
 
 
@@ -209,8 +202,7 @@
 #define CP_ON digitalWrite(PIN_CPOFF, LOW);
 #define CP_OFF digitalWrite(PIN_CPOFF, HIGH);
 
-#define PILOT_CONNECTED digitalWrite(PIN_CPOFF, LOW);
-#define PILOT_DISCONNECTED digitalWrite(PIN_CPOFF, HIGH);
+
 
 #define CONTACTOR1_ON _LOG_A("Switching Contactor1 ON.\n"); digitalWrite(PIN_SSR, HIGH);
 #define CONTACTOR1_OFF _LOG_A("Switching Contactor1 OFF.\n"); digitalWrite(PIN_SSR, LOW);

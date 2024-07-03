@@ -9,6 +9,10 @@ uint8_t getAccessTimer(void)
   return AccessTimer;
 }
 
+void setAccessTimer(uint8_t newtime)
+{
+  AccessTimer = newtime;
+}
 
 uint8_t getRFIDreaderMode(void)
 {

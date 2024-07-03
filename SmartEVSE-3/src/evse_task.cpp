@@ -9,7 +9,6 @@ void EVSEStates(void *parameter)
 
   // uint8_t n;
   uint8_t leftbutton = 5;
-  uint8_t DiodeCheck = 0;
   uint16_t StateTimer = 0; // When switching from State B to C, make sure pilot is at 6v for 100ms
 
   // infinite loop

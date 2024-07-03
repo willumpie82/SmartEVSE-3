@@ -9,7 +9,6 @@ uint16_t BacklightTimer = 0;        // Backlight timer (sec)
 uint8_t BacklightSet = 0;
 
 
-
 void showhelp(void)
 {
   if (LCDNav > MENU_ENTER && LCDNav < MENU_EXIT && (ScrollTimer + 5000 < millis()) && (!SubMenu))

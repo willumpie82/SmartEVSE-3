@@ -21,6 +21,8 @@ uint8_t PilotDisconnectTime = 0;         // Time the Control Pilot line should b
 
 uint8_t ResetKwh = 2;                    // if set, reset EV kwh meter at state transition B->C
 
+uint8_t DiodeCheck = 0;
+
 
 
 void resetCharger(void)
@@ -180,10 +182,12 @@ uint8_t Pilot()
 void samplePilot(void)
 {
     pilot = Pilot();
+    DiodeCheck = 0;
 }
 
 void handleEvseStateA(void)
 {
+
     if (State == STATE_A || State == STATE_COMM_B || State == STATE_B1)
     {
         // When the pilot line is disconnected, wait for PilotDisconnectTime, then reconnect
@@ -210,7 +214,7 @@ void handleEvseStateA(void)
             if (!ResetKwh)
                 ResetKwh = 1; // when set, reset EV kWh meter on state B->C change.
         }
-        else if (pilot == PILOT_9V && ErrorFlags == NO_ERROR && ChargeDelay == 0 && Access_bit && State != STATE_COMM_B
+        else if (pilot == PILOT_9V && getErrorFlags() == NO_ERROR && ChargeDelay == 0 && Access_bit && State != STATE_COMM_B
 #if MODEM
                  && State != STATE_MODEM_REQUEST && State != STATE_MODEM_WAIT && State != STATE_MODEM_DONE // switch to State B ?
 #endif
@@ -537,3 +541,4 @@ void setState(uint8_t NewState)
 
     // BacklightTimer = BACKLIGHT;                                                 // Backlight ON
 }
+
