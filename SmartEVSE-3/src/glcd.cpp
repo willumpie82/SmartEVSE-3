@@ -434,18 +434,19 @@ void GLCD(void) {
                     GLCD_write_buf_str(127,0, Str, GLCD_ALIGN_RIGHT);
                 } else GLCD_write_buf_str(0,0, "Not connected to WiFi", GLCD_ALIGN_LEFT);
 
-            // When Wifi Setup is selected, show password and SSID of the Access Point
+            // When Wifi Setup is selected, show AES key for the ESPTouch app
             } else if (WIFImode == 2) {
                 if (SubMenu && WiFi.getMode() != WIFI_AP_STA) {           // Do not show if AP_STA mode is started
-                    sprintf(Str, "O button starts portal");
+                    sprintf(Str, "O button starts config");
                     GLCD_write_buf_str(0,0, Str, GLCD_ALIGN_LEFT);
                 } else {
-                    // Show Access Point name
-                    sprintf(Str, "AP:%u", serialnr);
-                    GLCD_write_buf_str(0,0, Str, GLCD_ALIGN_LEFT);
-                    // and password
-                    sprintf(Str, "PW:%s", APpassword.c_str());
-                    GLCD_write_buf_str(127,0, Str, GLCD_ALIGN_RIGHT);
+                    // Show ESPTouch key
+                    sprintf(Str, "Key:%s", SmartConfigKey);
+                    GLCD_write_buf_str(0, 0, Str, GLCD_ALIGN_LEFT);
+                    GLCD_sendbuf(7, 1);
+                    GLCD_buffer_clr();
+                    sprintf(Str, "Now use EspTouch app ");
+                    GLCD_write_buf_str(0, 0, Str, GLCD_ALIGN_LEFT);
                 }
             }
         }
@@ -823,6 +824,7 @@ const char * getMenuItemOption(uint8_t nav) {
         case MENU_START:
                 sprintf(Str, "-%2u A", value);
                 return Str;
+        case MENU_SUMMAINSTIME:
         case MENU_STOP:
             if (value) {
                 sprintf(Str, "%2u min", value);
@@ -830,8 +832,13 @@ const char * getMenuItemOption(uint8_t nav) {
             } else return StrDisabled;
         case MENU_LOADBL:
             return StrLoadBl[LoadBl];
-        case MENU_MAINS:
         case MENU_SUMMAINS:
+            if (value)
+                sprintf(Str, "%2u A", value);
+            else
+                sprintf(Str, "Disabled");
+            return Str;
+        case MENU_MAINS:
         case MENU_MIN:
         case MENU_MAX:
         case MENU_CIRCUIT:
@@ -978,8 +985,11 @@ uint8_t getMenuItems (void) {
 #endif
     }
     MenuItems[m++] = MENU_MAX_TEMP;
-    if (MainsMeter && LoadBl < 2)
+    if (MainsMeter && LoadBl < 2) {
         MenuItems[m++] = MENU_SUMMAINS;
+        if (getItemValue(MENU_SUMMAINS) != 0)
+            MenuItems[m++] = MENU_SUMMAINSTIME;
+    }
     MenuItems[m++] = MENU_EXIT;
 
     return m;
@@ -1032,6 +1042,9 @@ void GLCDMenu(uint8_t Buttons) {
         setAccess(false);
         ButtonRelease = 1;
     } else if ((LCDNav == MENU_OFF) && (Buttons == 0x7)) {                      // Button 1 released before entering menu?
+        //if < button is pressed shorter then 2 seconds we are switching from Smart mode to Solar mode and vice versa
+        if (Mode)
+            setMode(~Mode & 0x3);                                               // Change from Solar to Smart mode and vice versa.
         LCDNav = 0;
         ButtonRelease = 0;
         GLCD();
@@ -1080,6 +1093,12 @@ void GLCDMenu(uint8_t Buttons) {
                         if (value !=2 )
                             handleWIFImode();                                   //postpone handling WIFImode == 2 to moving to upper line
                         break;
+                    case MENU_SUMMAINS:                                         // do not display the Sensorbox or unused slots here
+                        do {
+                            value = MenuNavInt(Buttons, value, MenuStr[LCDNav].Min, MenuStr[LCDNav].Max);
+                        } while (value > 0 && value < 10);
+                        setItemValue(LCDNav, value);
+                        break;
                     default:
                         value = MenuNavInt(Buttons, value, MenuStr[LCDNav].Min, MenuStr[LCDNav].Max);
                         setItemValue(LCDNav, value);
@@ -1121,7 +1140,7 @@ void GLCDMenu(uint8_t Buttons) {
                 ErrorFlags = NO_ERROR;                                          // Clear All Errors when exiting the Main Menu
                 TestState = 0;                                                  // Clear TestState
                 ChargeDelay = 0;                                                // Clear ChargeDelay
-                setSolarStopTimer(0);                                           // Disable Solar Timer
+                SolarStopTimer = 0;                                             // Disable Solar Timer
                 GLCD();
                 write_settings();                                               // Write to eeprom
                 ButtonRelease = 2;                                              // Skip updating of the LCD 

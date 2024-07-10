@@ -199,7 +199,8 @@ extern RemoteDebug Debug;
 
 #define ICAL 1024                                                               // Irms Calibration value (for Current transformers)
 #define MAX_MAINS 25                                                            // max Current the Mains connection can supply
-#define MAX_SUMMAINS 600                                                        // only used for capacity rate limiting, max current over the sum of all phases
+#define MAX_SUMMAINS 0                                                          // only used for capacity rate limiting, max current over the sum of all phases
+#define MAX_SUMMAINSTIME 0
 #define MAX_CURRENT 13                                                          // max charging Current for the EV
 #ifndef MIN_CURRENT
 #define MIN_CURRENT 6                                                           // minimum Current the EV will accept
@@ -240,9 +241,7 @@ extern RemoteDebug Debug;
 #define RFID_READER 0
 #define ACCESS_BIT 1
 #define WIFI_MODE 0
-#define AP_PASSWORD "00000000"
 #define CARD_OFFSET 0
-#define INITIALIZED 0
 #define ENABLE_C2 ALWAYS_ON
 #define MAX_TEMPERATURE 65
 #define DELAYEDSTARTTIME 0                                                             // The default StartTime for delayed charged, 0 = not delaying
@@ -327,10 +326,6 @@ extern RemoteDebug Debug;
 #define ACTUATOR_UNLOCK { _LOG_A("Unlocking Actuator.\n"); digitalWrite(PIN_ACTB, LOW); digitalWrite(PIN_ACTA, HIGH); }
 #define ACTUATOR_OFF { digitalWrite(PIN_ACTB, HIGH); digitalWrite(PIN_ACTA, HIGH); }
 
-#define ONEWIRE_LOW { digitalWrite(PIN_SW_IN, LOW); pinMode(PIN_SW_IN, OUTPUT); }   // SW set to 0, set to output (driven low)
-#define ONEWIRE_HIGH { digitalWrite(PIN_SW_IN, HIGH); pinMode(PIN_SW_IN, OUTPUT); } // SW set to 1, set to output (driven high)
-#define ONEWIRE_FLOATHIGH pinMode(PIN_SW_IN, INPUT_PULLUP );                        // SW input (floating high)
-
 #define RCMFAULT digitalRead(PIN_RCM_FAULT)
 #define FREE(x) free(x); x = NULL;
 #define FW_DOWNLOAD_PATH "http://smartevse-3.s3.eu-west-2.amazonaws.com"
@@ -409,15 +404,16 @@ extern RemoteDebug Debug;
 #define MENU_C2 36
 #define MENU_MAX_TEMP 37
 #define MENU_SUMMAINS 38
+#define MENU_SUMMAINSTIME 39
 #if ENABLE_OCPP == 0
-#define MENU_OFF 39                                                             // so access bit is reset and charging stops when pressing < button 2 seconds
-#define MENU_ON 40                                                              // so access bit is set and charging starts when pressing > button 2 seconds
-#define MENU_EXIT 41
-#else
-#define MENU_OCPP 39                                                            // OCPP Disable / Enable / Further modes
 #define MENU_OFF 40                                                             // so access bit is reset and charging stops when pressing < button 2 seconds
 #define MENU_ON 41                                                              // so access bit is set and charging starts when pressing > button 2 seconds
 #define MENU_EXIT 42
+#else
+#define MENU_OCPP 40                                                            // OCPP Disable / Enable / Further modes
+#define MENU_OFF 41                                                             // so access bit is reset and charging stops when pressing < button 2 seconds
+#define MENU_ON 42                                                              // so access bit is set and charging starts when pressing > button 2 seconds
+#define MENU_EXIT 43
 #endif
 
 #define MENU_STATE 50
@@ -438,11 +434,12 @@ extern RemoteDebug Debug;
 #define EM_API 9
 #define EM_EASTRON1P 10
 #define EM_FINDER_7M 11
-#define EM_UNUSED_SLOT1 12
-#define EM_UNUSED_SLOT2 13
-#define EM_UNUSED_SLOT3 14
-#define EM_UNUSED_SLOT4 15
-#define EM_CUSTOM 16
+#define EM_SINOTIMER 12
+#define EM_UNUSED_SLOT1 13
+#define EM_UNUSED_SLOT2 14
+#define EM_UNUSED_SLOT3 15
+#define EM_UNUSED_SLOT4 16
+#define EM_CUSTOM 17
 
 #define ENDIANESS_LBF_LWF 0
 #define ENDIANESS_LBF_HWF 1
@@ -468,7 +465,7 @@ extern portMUX_TYPE rtc_spinlock;   //TODO: Will be placed in the appropriate po
 #define RTC_EXIT_CRITICAL()     portEXIT_CRITICAL(&rtc_spinlock)
 
 
-extern String APpassword;
+extern char SmartConfigKey[];
 extern struct tm timeinfo;
 
 
@@ -572,11 +569,12 @@ const struct {
     {"ENE REGI","Register for Energy (kWh) of custom electric meter", 0, 65534, EMCUSTOM_EREGISTER},
     {"ENE DIVI","Divisor for Energy (kWh) of custom electric meter",  0, 7, EMCUSTOM_EDIVISOR},
     {"READ MAX","Max register read at once of custom electric meter", 3, 255, 3},
-    {"WIFI",    "Connect to WiFi access point",                       0, 2, WIFI_MODE},
+    {"WIFI",    "Use ESPTouch APP on your phone",                       0, 2, WIFI_MODE},
     {"AUTOUPDAT","Automatic Firmware Update",                         0, 1, AUTOUPDATE},
     {"CONTACT 2","Contactor2 (C2) behaviour",                          0, sizeof(StrEnableC2) / sizeof(StrEnableC2[0])-1, ENABLE_C2},
     {"MAX TEMP","Maximum temperature for the EVSE module",            40, 75, MAX_TEMPERATURE},
-    {"SUM MAINS","Capacity Rate limit on sum of MAINS Current (A)",    10, 600, MAX_SUMMAINS},
+    {"CAPACITY","Capacity Rate limit on sum of MAINS Current (A)",    0, 600, MAX_SUMMAINS},
+    {"CAP STOP","Stop Capacity Rate limit charging after X minutes",    0, 60, MAX_SUMMAINSTIME},
 #if ENABLE_OCPP
     {"OCPP",    "Select OCPP mode",                                   0, 1, OCPP_MODE},
 #endif
@@ -618,10 +616,8 @@ struct DelayedTimeStruct {
 
 extern struct DelayedTimeStruct DelayedStartTime;
 
-void CheckAPpassword(void);
 void read_settings();
 void write_settings(void);
-void setSolarStopTimer(uint16_t Timer);
 void setState(uint8_t NewState);
 void setAccess(bool Access);
 void SetCPDuty(uint32_t DutyCycle);
@@ -629,6 +625,7 @@ uint8_t setItemValue(uint8_t nav, uint16_t val);
 uint16_t getItemValue(uint8_t nav);
 void ConfigureModbusMode(uint8_t newmode);
 
+void setMode(uint8_t NewMode) ;
 void handleWIFImode(void);
 
 #if ENABLE_OCPP
