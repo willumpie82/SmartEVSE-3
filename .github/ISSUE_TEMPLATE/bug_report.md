@@ -9,6 +9,9 @@ assignees: ''
 
 **Describe the bug**
 A clear and concise description of what the bug is.
+PLEASE DO NOT SEND IN FEATURE REQUESTS to this repo; this is the STABLE factory repository.
+Feature requests please to our community development repository:
+https://github.com/dingo35/SmartEVSE-3.5/issues/new?template=feature_request.md
 
 **Upload your config**
 Press the "raw" button in the SmartEVSE webserver and upload the json settings file, so we can look at your configuration.

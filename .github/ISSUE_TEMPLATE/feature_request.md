@@ -7,15 +7,6 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
-ALSO, if your feature request relates to any reported issues previously, please LINK them here!
-
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+PLEASE DO NOT SEND IN FEATURE REQUESTS to this repo; this is the STABLE factory repository.
+Feature requests please to our community development repository:
+https://github.com/dingo35/SmartEVSE-3.5/issues/new?template=feature_request.md
